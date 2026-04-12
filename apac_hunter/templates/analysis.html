@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ brief.individual_name }} — Analysis · APAC Hunter</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    body { font-family: Georgia, serif; background: #f5f5f5; margin: 0; }
+    .header {
+      background: #151515;
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .brand { font-size: 13px; font-weight: 600; letter-spacing: 0.1em; color: white; }
+    .back-link { font-size: 13px; color: #A5A5A5; text-decoration: none; margin-left: 24px; }
+    .back-link:hover { color: white; }
+    .header-right { font-size: 11px; color: #A5A5A5; }
+    .page-header {
+      background: white;
+      border-bottom: 1px solid #DDDDDD;
+      padding: 20px 40px;
+    }
+    .page-header h1 { font-size: 22px; font-weight: 400; color: #151515; }
+    .page-header p { font-size: 13px; color: #696969; margin-top: 4px; }
+    .trigger-badge {
+      display: inline-block;
+      background: #1A7CD7;
+      color: white;
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 10px;
+      margin-top: 8px;
+    }
+    .loading-container {
+      max-width: 600px;
+      margin: 80px auto;
+      text-align: center;
+      padding: 40px;
+    }
+    .loading-spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid #DDDDDD;
+      border-top-color: #1A7CD7;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 24px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-title { font-size: 18px; color: #151515; margin-bottom: 8px; font-family: Georgia, serif; }
+    .loading-sub { font-size: 13px; color: #696969; line-height: 1.6; }
+    .generate-prompt {
+      max-width: 600px;
+      margin: 60px auto;
+      text-align: center;
+      padding: 40px;
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #DDDDDD;
+    }
+    .generate-prompt h2 { font-size: 20px; font-weight: 400; color: #151515; margin-bottom: 8px; }
+    .generate-prompt p { font-size: 13px; color: #696969; margin-bottom: 24px; line-height: 1.6; }
+    .generate-btn {
+      padding: 14px 32px;
+      background: #FDC500;
+      color: #151515;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: Georgia, serif;
+    }
+    .generate-btn:hover { background: #e6b000; }
+    .template-info { margin-top: 16px; font-size: 12px; color: #A5A5A5; }
+    .error-container {
+      max-width: 600px;
+      margin: 60px auto;
+      padding: 40px;
+      text-align: center;
+    }
+    .error-box {
+      background: #fde8e8;
+      border: 1px solid #f5c6c6;
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+    .error-box h3 { color: #c0392b; margin-bottom: 8px; }
+    .error-box p { color: #c0392b; font-size: 13px; font-family: monospace; word-break: break-all; }
+    .retry-btn {
+      padding: 10px 24px;
+      background: #1A7CD7;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: Georgia, serif;
+    }
+    #analysis-container { padding: 24px 40px; max-width: 1400px; margin: 0 auto; }
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      padding: 16px 40px;
+      border-top: 1px solid #DDDDDD;
+      margin-top: 40px;
+      font-size: 11px;
+      color: #A5A5A5;
+    }
+    .footer-brand { font-weight: 600; color: #151515; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div style="display:flex;align-items:center">
+    <span class="brand">ICONIQ</span>
+    <a href="/brief/{{ brief.id }}" class="back-link">← Brief</a>
+    <a href="/" class="back-link">Dashboard</a>
+  </div>
+  <div class="header-right">Private &amp; Strictly Confidential</div>
+</div>
+
+<div class="page-header">
+  <h1>{{ template.icon }} {{ template.label }} — {{ brief.individual_name }}</h1>
+  <p>{{ template.description }}</p>
+  <span class="trigger-badge">{{ brief.last_trigger_type }}</span>
+</div>
+
+<div id="generate-prompt" class="generate-prompt">
+  <h2>{{ template.icon }} {{ template.label }}</h2>
+  <p>Generate a quantitative analytical model for <strong>{{ brief.individual_name }}</strong> using primary filing data. Renders as an interactive scenario tool.</p>
+  <button class="generate-btn" onclick="startGeneration()">Generate Analysis</button>
+  <div class="template-info">Template: {{ template.label }} · Powered by Claude · ~30 seconds</div>
+</div>
+
+<div id="loading" class="loading-container" style="display:none">
+  <div class="loading-spinner"></div>
+  <div class="loading-title">Building analytical model...</div>
+  <div class="loading-sub">Claude is constructing an interactive scenario tool for {{ brief.individual_name }} from primary filing data. This takes about 30 seconds.</div>
+</div>
+
+<div id="error" class="error-container" style="display:none">
+  <div class="error-box">
+    <h3>Analysis generation failed</h3>
+    <p id="error-message"></p>
+  </div>
+  <button class="retry-btn" onclick="location.reload()">Try Again</button>
+</div>
+
+<div id="analysis-container" style="display:none">
+  <div id="react-root"></div>
+</div>
+
+<div class="footer">
+  <span class="footer-brand">ICONIQ</span>
+  <span>Private &amp; Strictly Confidential · APAC Hunter</span>
+  <span>v1.0</span>
+</div>
+
+<script>
+const BRIEF_ID = "{{ brief.id }}";
+
+function startGeneration() {
+  document.getElementById('generate-prompt').style.display = 'none';
+  document.getElementById('loading').style.display = 'block';
+
+  fetch('/analysis/' + BRIEF_ID + '/generate', { method: 'POST' })
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById('loading').style.display = 'none';
+      if (data.success && data.code) {
+        renderAnalysis(data.code);
+      } else {
+        showError(data.error || 'Unknown error occurred');
+      }
+    })
+    .catch(err => {
+      document.getElementById('loading').style.display = 'none';
+      showError(err.toString());
+    });
+}
+
+function renderAnalysis(code) {
+  document.getElementById('analysis-container').style.display = 'block';
+
+  try {
+    // Strip export default and replace with window.AppComponent
+    let processedCode = code
+      .replace(/^export default\s+/m, 'window.__AnalysisApp = ')
+      .replace(/^export default function\s+(\w+)/m, 'window.__AnalysisApp = function $1')
+      .replace(/^export default class\s+(\w+)/m, 'window.__AnalysisApp = class $1');
+
+    // If no export default found, wrap the last function/class definition
+    if (!processedCode.includes('window.__AnalysisApp')) {
+      processedCode = processedCode + '\nwindow.__AnalysisApp = App;';
+    }
+
+    const transformed = Babel.transform(processedCode, {
+      presets: ['react'],
+      plugins: []
+    }).code;
+
+    eval(transformed);
+
+    if (window.__AnalysisApp) {
+      const root = ReactDOM.createRoot(document.getElementById('react-root'));
+      root.render(React.createElement(window.__AnalysisApp));
+    } else {
+      showError('Component not found after transformation');
+    }
+  } catch(e) {
+    showError('Render error: ' + e.message);
+  }
+}
+
+function showError(message) {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('error').style.display = 'block';
+  document.getElementById('error-message').textContent = message;
+}
+</script>
+
+</body>
+</html>

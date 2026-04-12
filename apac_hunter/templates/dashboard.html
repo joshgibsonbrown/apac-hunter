@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>APAC Hunter — Dashboard</title>
+  <style>
+    :root {
+      --color-black: #151515;
+      --color-dark-grey: #696969;
+      --color-mid-grey: #A5A5A5;
+      --color-light-grey: #DDDDDD;
+      --color-off-white: #F2F2F2;
+      --color-white: #FFFFFF;
+      --color-primary: #1A7CD7;
+      --color-secondary: #374B68;
+      --color-accent: #4DB96B;
+      --color-highlight: #FDC500;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Georgia, serif; background: var(--color-off-white); color: var(--color-dark-grey); }
+    .header {
+      background: var(--color-black);
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .header-left { display: flex; align-items: center; gap: 24px; }
+    .brand { font-size: 13px; font-weight: 600; letter-spacing: 0.1em; color: white; }
+    .app-name { font-size: 14px; color: var(--color-mid-grey); }
+    .header-right { display: flex; align-items: center; gap: 16px; }
+    .confidential { font-size: 11px; color: var(--color-mid-grey); }
+    .logout { font-size: 12px; color: var(--color-mid-grey); text-decoration: none; }
+    .logout:hover { color: white; }
+    .main { max-width: 1200px; margin: 0 auto; padding: 32px 40px; }
+    .page-title { margin-bottom: 24px; }
+    .page-title h1 { font-size: 28px; font-weight: 400; color: var(--color-black); margin-bottom: 4px; }
+    .page-title p { font-size: 13px; color: var(--color-mid-grey); }
+    .scan-panel {
+      background: white;
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+    .scan-top { display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+    .scan-panel h3 { font-size: 16px; font-weight: 600; color: var(--color-black); margin-bottom: 4px; }
+    .scan-panel p { font-size: 13px; color: var(--color-dark-grey); }
+    .scan-controls { display: flex; align-items: center; gap: 12px; flex-shrink: 0; flex-wrap: wrap; }
+    .scan-controls select {
+      padding: 8px 12px;
+      border: 1px solid var(--color-light-grey);
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: Georgia, serif;
+      background: white;
+    }
+    .region-checks { display: flex; align-items: center; gap: 14px; }
+    .region-checks label {
+      font-size: 13px;
+      color: var(--color-dark-grey);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .region-checks input[type="checkbox"] { accent-color: var(--color-primary); }
+    .scan-btn {
+      padding: 10px 24px;
+      background: var(--color-primary);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: Georgia, serif;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .scan-btn:hover { background: #1565b0; }
+    .scan-btn:disabled { background: var(--color-mid-grey); cursor: not-allowed; }
+    .scan-progress {
+      display: none;
+      margin-top: 16px;
+      padding: 14px 16px;
+      background: var(--color-off-white);
+      border-radius: 6px;
+    }
+    .progress-bar-wrap {
+      height: 4px;
+      background: var(--color-light-grey);
+      border-radius: 2px;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      background: var(--color-primary);
+      border-radius: 2px;
+      width: 0%;
+      transition: width 0.5s ease;
+    }
+    .progress-text { font-size: 12px; color: var(--color-dark-grey); }
+    .stats-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 32px; }
+    .stat-card { background: white; border-radius: 8px; padding: 20px; text-align: center; }
+    .stat-value { font-size: 32px; font-weight: 600; color: var(--color-primary); display: block; }
+    .stat-label { font-size: 11px; color: var(--color-mid-grey); margin-top: 4px; }
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .section-title { font-size: 18px; font-weight: 400; color: var(--color-black); }
+
+    /* Region filter tabs */
+    .region-filter { display: flex; gap: 8px; flex-wrap: wrap; }
+    .region-tab {
+      padding: 6px 16px;
+      border-radius: 16px;
+      font-size: 12px;
+      font-family: Georgia, serif;
+      border: 1px solid var(--color-light-grey);
+      background: white;
+      color: var(--color-dark-grey);
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s;
+    }
+    .region-tab:hover { border-color: var(--color-primary); color: var(--color-primary); }
+    .region-tab.active { background: var(--color-primary); color: white; border-color: var(--color-primary); }
+
+    /* Status filter row */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .status-filters { display: flex; gap: 6px; flex-wrap: wrap; }
+    .status-tab {
+      padding: 5px 14px;
+      border-radius: 14px;
+      font-size: 11px;
+      font-family: Georgia, serif;
+      border: 1px solid var(--color-light-grey);
+      background: white;
+      color: var(--color-dark-grey);
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .status-tab:hover { border-color: var(--color-secondary); color: var(--color-secondary); }
+    .status-tab.active { background: var(--color-secondary); color: white; border-color: var(--color-secondary); }
+    .status-tab-New.active    { background: #607d8b; border-color: #607d8b; }
+    .status-tab-Triage.active { background: #e65100; border-color: #e65100; }
+    .status-tab-Priority.active { background: #1a7cd7; border-color: #1a7cd7; }
+    .status-tab-Monitor.active  { background: #2e7d32; border-color: #2e7d32; }
+    .status-tab-Handoff.active  { background: #6a1b9a; border-color: #6a1b9a; }
+    .status-tab-Discarded.active { background: #9e9e9e; border-color: #9e9e9e; }
+
+    .sort-select {
+      padding: 5px 10px;
+      border: 1px solid var(--color-light-grey);
+      border-radius: 4px;
+      font-size: 12px;
+      font-family: Georgia, serif;
+      background: white;
+      cursor: pointer;
+    }
+
+    /* Inline status badge on cards */
+    .status-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      padding: 2px 8px;
+      border-radius: 10px;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+    .status-New      { background: #eceff1; color: #607d8b; }
+    .status-Triage   { background: #fff3e0; color: #e65100; }
+    .status-Priority { background: #e3f2fd; color: #1565c0; }
+    .status-Monitor  { background: #e8f5e9; color: #2e7d32; }
+    .status-Handoff  { background: #f3e5f5; color: #6a1b9a; }
+    .status-Discarded { background: #f5f5f5; color: #9e9e9e; }
+
+    .status-select {
+      padding: 3px 6px;
+      border: 1px solid var(--color-light-grey);
+      border-radius: 4px;
+      font-size: 11px;
+      font-family: Georgia, serif;
+      background: white;
+      cursor: pointer;
+      color: var(--color-dark-grey);
+    }
+
+    .briefs-grid { display: flex; flex-direction: column; gap: 12px; margin-bottom: 40px; }
+    .brief-card {
+      background: white;
+      border-radius: 8px;
+      padding: 24px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      align-items: start;
+      transition: box-shadow 0.15s;
+    }
+    .brief-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
+    .brief-name-row { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
+    .brief-name { font-size: 16px; font-weight: 600; color: var(--color-black); }
+    .brief-company { font-size: 13px; color: var(--color-dark-grey); margin-bottom: 8px; }
+    .brief-trigger { font-size: 12px; color: var(--color-primary); margin-bottom: 8px; }
+    .brief-summary { font-size: 13px; color: var(--color-dark-grey); line-height: 1.5; }
+
+    /* Region badge pill */
+    .region-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      padding: 2px 8px;
+      border-radius: 10px;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+    .region-badge-apac { background: #e3f2fd; color: #1565c0; }
+    .region-badge-europe { background: #fce4ec; color: #ad1457; }
+    .region-badge-unknown { background: var(--color-off-white); color: var(--color-mid-grey); }
+
+    .brief-scores { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+    .score-row { display: flex; align-items: center; gap: 8px; }
+    .score-label { font-size: 10px; color: var(--color-mid-grey); width: 56px; text-align: right; }
+    .score-bar { width: 80px; height: 6px; background: var(--color-light-grey); border-radius: 3px; overflow: hidden; }
+    .score-fill { height: 100%; border-radius: 3px; }
+    .score-fill.urgency { background: #e74c3c; }
+    .score-fill.wealth { background: var(--color-accent); }
+    .score-fill.access { background: var(--color-highlight); }
+    .confidence-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 600; margin-top: 8px; }
+    .confidence-High { background: #e8f5e9; color: #2e7d32; }
+    .confidence-Medium { background: #fff3e0; color: #e65100; }
+    .confidence-Low { background: #fce4ec; color: #c62828; }
+    .empty-state { background: white; border-radius: 8px; padding: 48px; text-align: center; color: var(--color-mid-grey); }
+    .empty-state h3 { font-size: 18px; font-weight: 400; margin-bottom: 8px; color: var(--color-dark-grey); }
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      padding: 16px 40px;
+      border-top: 1px solid var(--color-light-grey);
+      font-size: 11px;
+      color: var(--color-mid-grey);
+      margin-top: 40px;
+    }
+    .footer-brand { font-weight: 600; color: var(--color-black); }
+
+    /* Lock-up expiry table */
+    .lockup-section { margin-bottom: 40px; }
+    .lockup-table { width: 100%; background: white; border-radius: 8px; overflow: hidden; }
+    .lockup-table th {
+      text-align: left; font-size: 11px; color: var(--color-mid-grey);
+      padding: 12px 16px; border-bottom: 1px solid var(--color-light-grey);
+      font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .lockup-table td {
+      font-size: 13px; color: var(--color-dark-grey); padding: 12px 16px;
+      border-bottom: 1px solid var(--color-off-white);
+    }
+    .lockup-table tr:last-child td { border-bottom: none; }
+    .days-badge {
+      display: inline-block; font-size: 11px; font-weight: 600;
+      padding: 2px 8px; border-radius: 10px;
+    }
+    .days-urgent { background: #fce4ec; color: #c62828; }
+    .days-soon { background: #fff3e0; color: #e65100; }
+    .days-normal { background: #e8f5e9; color: #2e7d32; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <span class="brand">ICONIQ</span>
+    <span class="app-name">APAC Hunter — Trigger + Access Engine</span>
+  </div>
+  <div class="header-right">
+    <span class="confidential">Private &amp; Strictly Confidential</span>
+    <a href="/logout" class="logout">Log out</a>
+  </div>
+</div>
+
+<div class="main">
+  <div class="page-title">
+    <h1>Opportunity Dashboard</h1>
+    <p>Founder and family wealth trigger events · Ranked by urgency, wealth size, and access ease</p>
+  </div>
+
+  {% if scan_stats %}
+  <div style="background: white; border-radius: 8px; padding: 12px 20px; margin-bottom: 16px; font-size: 12px; color: var(--color-dark-grey); display: flex; gap: 16px; flex-wrap: wrap;">
+    <span>Last scan: <strong>{{ scan_stats.timestamp }}</strong></span>
+    <span>Mode: <strong>{{ scan_stats.mode|upper }}</strong></span>
+    <span>Fetched: <strong>{{ scan_stats.items_fetched }}</strong></span>
+    <span>After filter: <strong>{{ scan_stats.items_after_filter }}</strong></span>
+    <span>Triggers: <strong>{{ scan_stats.triggers_found }}</strong></span>
+    <span>Briefs: <strong>{{ scan_stats.briefs_generated }}</strong></span>
+  </div>
+  {% endif %}
+
+  <div class="scan-panel">
+    <div class="scan-top">
+      <div>
+        <h3>Run Intelligence Scan</h3>
+        <p>Quick scan: core sources (~5 min). Deep scan: all sources including PE deals, unicorns, M&A regulatory (~15 min).</p>
+      </div>
+      <div class="scan-controls">
+        <div class="region-checks">
+          {% for rid, rcfg in all_regions.items() %}
+          <label><input type="checkbox" class="region-cb" value="{{ rid }}" checked> {{ rcfg.label }}</label>
+          {% endfor %}
+        </div>
+        <select id="scan-mode">
+          <option value="quick" selected>Quick Scan</option>
+          <option value="deep">Deep Scan</option>
+        </select>
+        <select id="days-back">
+          <option value="3">Last 3 days</option>
+          <option value="7" selected>Last 7 days</option>
+          <option value="14">Last 14 days</option>
+          <option value="30">Last 30 days</option>
+        </select>
+        <button class="scan-btn" id="scan-btn" onclick="triggerScan()">Run Scan</button>
+      </div>
+    </div>
+    <div class="scan-progress" id="scan-progress">
+      <div class="progress-bar-wrap">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+      <div class="progress-text" id="progress-text">Initialising scan...</div>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <span class="stat-value">{{ briefs|length }}</span>
+      <span class="stat-label">Total briefs</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{{ briefs|selectattr('confidence', 'equalto', 'High')|list|length }}</span>
+      <span class="stat-label">High confidence</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{{ events|length }}</span>
+      <span class="stat-label">Trigger events</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{{ insider_count or 0 }}</span>
+      <span class="stat-label">Insider txns (30d)</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{{ briefs|selectattr('urgency_score', 'ge', 7)|list|length }}</span>
+      <span class="stat-label">High urgency</span>
+    </div>
+  </div>
+
+  <!-- Region + status filters, sort control -->
+  <div class="section-header" style="margin-bottom:12px;">
+    <h2 class="section-title">Strategic Briefs</h2>
+    <div class="region-filter">
+      {% set qs_region = "" %}
+      <a href="/{% if active_status %}?status={{ active_status }}{% endif %}" class="region-tab {% if not active_region %}active{% endif %}">All</a>
+      {% for rid, rcfg in all_regions.items() %}
+      <a href="/briefs/{{ rid }}{% if active_status %}?status={{ active_status }}{% endif %}" class="region-tab {% if active_region == rid %}active{% endif %}">{{ rcfg.label }}</a>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <div class="status-filters">
+      {% set base_url = ('/briefs/' ~ active_region) if active_region else '/' %}
+      <a href="{{ base_url }}" class="status-tab {% if not active_status %}active{% endif %}">All statuses</a>
+      {% for s in workflow_statuses %}
+      <a href="{{ base_url }}?status={{ s }}{% if active_trigger %}&trigger={{ active_trigger|urlencode }}{% endif %}" class="status-tab status-tab-{{ s }} {% if active_status == s %}active{% endif %}">{{ s }}</a>
+      {% endfor %}
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <select class="sort-select" onchange="applyTriggerFilter(this.value)">
+        <option value="">All trigger types</option>
+        {% for t in trigger_types %}
+        <option value="{{ t }}" {% if active_trigger == t %}selected{% endif %}>{{ t }}</option>
+        {% endfor %}
+      </select>
+      <select class="sort-select" onchange="applySort(this.value)">
+        <option value="newest" {% if active_sort == 'newest' %}selected{% endif %}>Newest first</option>
+        <option value="status" {% if active_sort == 'status' %}selected{% endif %}>By status</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="briefs-grid">
+    {% if briefs %}
+      {% for brief in briefs %}
+      <div class="brief-card" style="cursor:default;">
+        <a href="/brief/{{ brief.id }}" class="brief-card-link" style="text-decoration:none;color:inherit;display:contents;">
+        <div>
+          <div class="brief-name-row">
+            <span class="brief-name">{{ brief.individual_name }}</span>
+            {% set br = brief.region|default('apac') %}
+            <span class="region-badge region-badge-{{ br }}">{{ br|upper }}</span>
+            <span class="status-badge status-{{ brief.workflow_status|default('New') }}">{{ brief.workflow_status|default('New') }}</span>
+          </div>
+          <div class="brief-company">{{ brief.company }}</div>
+          <div class="brief-trigger">{{ brief.last_trigger_type }}</div>
+          <div class="brief-summary">{{ brief.event_summary[:200] if brief.event_summary else 'No summary available.' }}...</div>
+        </div>
+        </a>
+        <div class="brief-scores">
+          <div class="score-row">
+            <span class="score-label">Urgency</span>
+            <div class="score-bar"><div class="score-fill urgency" style="width: {{ (brief.urgency_score or 0) * 10 }}%"></div></div>
+          </div>
+          <div class="score-row">
+            <span class="score-label">Wealth</span>
+            <div class="score-bar"><div class="score-fill wealth" style="width: {{ (brief.wealth_score or 0) * 10 }}%"></div></div>
+          </div>
+          <span class="confidence-badge confidence-{{ brief.confidence or 'Medium' }}">{{ brief.confidence or 'Medium' }}</span>
+          <div style="margin-top:10px;">
+            <select class="status-select" data-brief-id="{{ brief.id }}" onchange="updateStatus(this)">
+              {% for s in workflow_statuses %}
+              <option value="{{ s }}" {% if (brief.workflow_status|default('New')) == s %}selected{% endif %}>{{ s }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">
+        <h3>No briefs yet</h3>
+        <p>Run a scan above to detect trigger events and generate your first strategic briefs.</p>
+      </div>
+    {% endif %}
+  </div>
+  {% if lockups %}
+  <div class="lockup-section">
+    <div class="section-header">
+      <h2 class="section-title">IPO Pipeline — Upcoming Lock-Up Expiries</h2>
+    </div>
+    <table class="lockup-table">
+      <thead>
+        <tr>
+          <th>Company</th>
+          <th>Ticker</th>
+          <th>IPO Date</th>
+          <th>Lock-Up Expiry</th>
+          <th>Days Until</th>
+          <th>Region</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for l in lockups %}
+        {% set today_ts = None %}
+        <tr>
+          <td>{{ l.company }}</td>
+          <td>{{ l.ticker or '—' }}</td>
+          <td>{{ l.ipo_date or '—' }}</td>
+          <td>{{ l.lockup_expiry_date }}</td>
+          <td>
+            <span class="days-badge {% if l.days_until is defined and l.days_until <= 7 %}days-urgent{% elif l.days_until is defined and l.days_until <= 14 %}days-soon{% else %}days-normal{% endif %}">
+              {{ l.lockup_expiry_date }}
+            </span>
+          </td>
+          <td>
+            <span class="region-badge region-badge-{{ l.region|default('apac') }}">{{ (l.region or 'apac')|upper }}</span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  {% if insider_sales %}
+  <div class="lockup-section">
+    <div class="section-header">
+      <h2 class="section-title">Recent Insider Sales</h2>
+    </div>
+    <table class="lockup-table">
+      <thead>
+        <tr>
+          <th>Individual</th>
+          <th>Company</th>
+          <th>Date</th>
+          <th>Shares</th>
+          <th>Total Value</th>
+          <th>Type</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in insider_sales %}
+        <tr>
+          <td>{{ t.individual_name }}</td>
+          <td>{{ t.company }} {% if t.ticker %}({{ t.ticker }}){% endif %}</td>
+          <td>{{ t.transaction_date or '—' }}</td>
+          <td>{{ "{:,.0f}".format(t.shares or 0) }}</td>
+          <td>${{ "{:,.0f}".format(t.total_value or 0) }}</td>
+          <td>{{ t.transaction_code or '—' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+</div>
+
+<div class="footer">
+  <span class="footer-brand">ICONIQ</span>
+  <span>Private &amp; Strictly Confidential</span>
+  <span>APAC Hunter v3.0 — Multi-Region + Intelligence</span>
+</div>
+
+<script>
+function triggerScan() {
+  const btn = document.getElementById('scan-btn');
+  const progress = document.getElementById('scan-progress');
+  const text = document.getElementById('progress-text');
+  const daysBack = document.getElementById('days-back').value;
+
+  const regionCbs = document.querySelectorAll('.region-cb:checked');
+  const regions = Array.from(regionCbs).map(cb => cb.value).join(',');
+  if (!regions) {
+    alert('Please select at least one region.');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Scanning...';
+  progress.style.display = 'block';
+
+  const formData = new FormData();
+  formData.append('days_back', daysBack);
+  formData.append('regions', regions);
+  formData.append('scan_mode', document.getElementById('scan-mode').value);
+
+  fetch('/scan', { method: 'POST', body: formData })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        pollStatus(data.job_id);
+      } else {
+        text.textContent = 'Error: ' + (data.error || 'Unknown error');
+        btn.disabled = false;
+        btn.textContent = 'Run Scan';
+      }
+    })
+    .catch(() => {
+      text.textContent = 'Scan submitted. Polling for status...';
+      pollStatus(null);
+    });
+}
+
+function applySort(value) {
+  const url = new URL(window.location.href);
+  url.searchParams.set('sort', value);
+  window.location.href = url.toString();
+}
+
+function applyTriggerFilter(value) {
+  const url = new URL(window.location.href);
+  if (value) {
+    url.searchParams.set('trigger', value);
+  } else {
+    url.searchParams.delete('trigger');
+  }
+  window.location.href = url.toString();
+}
+
+function updateStatus(select) {
+  const briefId = select.dataset.briefId;
+  const status = select.value;
+  fetch('/brief/' + briefId + '/status', {
+    method: 'PATCH',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({status: status})
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (!data.success) {
+      alert('Failed to update status: ' + (data.error || 'Unknown error'));
+    }
+  })
+  .catch(() => alert('Network error updating status'));
+}
+
+function pollStatus(jobId) {
+  const bar = document.getElementById('progress-bar');
+  const text = document.getElementById('progress-text');
+  const btn = document.getElementById('scan-btn');
+
+  const statusUrl = jobId ? '/scan/status?job_id=' + encodeURIComponent(jobId) : '/scan/status';
+
+  const interval = setInterval(() => {
+    fetch(statusUrl)
+      .then(r => r.json())
+      .then(state => {
+        bar.style.width = state.progress + '%';
+        text.textContent = state.status || 'Running...';
+
+        if (!state.running && state.progress >= 100) {
+          clearInterval(interval);
+          text.textContent = state.status + ' Refreshing...';
+          setTimeout(() => window.location.reload(), 1500);
+        } else if (!state.running && state.error) {
+          clearInterval(interval);
+          text.textContent = 'Error: ' + state.error;
+          btn.disabled = false;
+          btn.textContent = 'Run Scan';
+        }
+      })
+      .catch(() => {});
+  }, 3000);
+}
+</script>
+</body>
+</html>

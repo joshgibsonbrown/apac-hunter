@@ -1,0 +1,12 @@
+flask
+anthropic
+requests
+beautifulsoup4
+supabase==2.9.1
+python-dotenv
+pydantic>=2.6
+eval-type-backport
+resend
+apscheduler
+google-search-results
+feedparser

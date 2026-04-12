@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ brief.individual_name }} — APAC Hunter</title>
+  <style>
+    :root {
+      --color-black: #151515;
+      --color-dark-grey: #696969;
+      --color-mid-grey: #A5A5A5;
+      --color-light-grey: #DDDDDD;
+      --color-off-white: #F2F2F2;
+      --color-white: #FFFFFF;
+      --color-primary: #1A7CD7;
+      --color-secondary: #374B68;
+      --color-accent: #4DB96B;
+      --color-highlight: #FDC500;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Georgia, serif; background: var(--color-off-white); color: var(--color-dark-grey); }
+
+    .header {
+      background: var(--color-black);
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .header-left { display: flex; align-items: center; gap: 24px; }
+    .brand { font-size: 13px; font-weight: 600; letter-spacing: 0.1em; color: white; }
+    .back-link { font-size: 13px; color: var(--color-mid-grey); text-decoration: none; }
+    .back-link:hover { color: white; }
+    .confidential { font-size: 11px; color: var(--color-mid-grey); }
+
+    .main { max-width: 900px; margin: 0 auto; padding: 40px; }
+
+    .brief-header {
+      background: white;
+      border-radius: 8px;
+      padding: 32px;
+      margin-bottom: 24px;
+    }
+    .brief-meta { font-size: 12px; color: var(--color-mid-grey); margin-bottom: 12px; }
+    .brief-name { font-size: 32px; font-weight: 400; color: var(--color-black); margin-bottom: 4px; }
+    .brief-company { font-size: 16px; color: var(--color-dark-grey); margin-bottom: 16px; }
+    .brief-trigger-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
+    .brief-trigger {
+      display: inline-block;
+      background: var(--color-primary);
+      color: white;
+      font-size: 12px;
+      padding: 4px 12px;
+      border-radius: 12px;
+    }
+
+    /* Workflow status */
+    .status-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      padding: 3px 10px;
+      border-radius: 10px;
+      text-transform: uppercase;
+    }
+    .status-New      { background: #eceff1; color: #607d8b; }
+    .status-Triage   { background: #fff3e0; color: #e65100; }
+    .status-Priority { background: #e3f2fd; color: #1565c0; }
+    .status-Monitor  { background: #e8f5e9; color: #2e7d32; }
+    .status-Handoff  { background: #f3e5f5; color: #6a1b9a; }
+    .status-Discarded { background: #f5f5f5; color: #9e9e9e; }
+    .status-select {
+      padding: 4px 8px;
+      border: 1px solid var(--color-light-grey);
+      border-radius: 4px;
+      font-size: 12px;
+      font-family: Georgia, serif;
+      background: white;
+      cursor: pointer;
+      color: var(--color-dark-grey);
+    }
+
+    .score-strip { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 24px; }
+    .score-box { text-align: center; padding: 16px; background: var(--color-off-white); border-radius: 6px; }
+    .score-number { font-size: 28px; font-weight: 600; display: block; }
+    .score-number.urgency { color: #e74c3c; }
+    .score-number.wealth { color: var(--color-accent); }
+    .score-name { font-size: 11px; color: var(--color-mid-grey); margin-top: 4px; }
+    .confidence-row { margin-top: 16px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--color-dark-grey); }
+    .confidence-badge { padding: 2px 10px; border-radius: 10px; font-weight: 600; font-size: 11px; }
+    .confidence-High { background: #e8f5e9; color: #2e7d32; }
+    .confidence-Medium { background: #fff3e0; color: #e65100; }
+    .confidence-Low { background: #fce4ec; color: #c62828; }
+
+    /* Action bar */
+    .action-bar {
+      background: var(--color-secondary);
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .action-bar-left h3 { font-size: 14px; font-weight: 600; color: white; margin-bottom: 4px; }
+    .action-bar-left p { font-size: 12px; color: var(--color-mid-grey); }
+    .analysis-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      background: var(--color-highlight);
+      color: var(--color-black);
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: Georgia, serif;
+      cursor: pointer;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: background 0.15s;
+    }
+    .analysis-btn:hover { background: #e6b000; }
+
+    .brief-section {
+      background: white;
+      border-radius: 8px;
+      padding: 28px 32px;
+      margin-bottom: 16px;
+    }
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--color-primary);
+      margin-bottom: 12px;
+    }
+    .section-content {
+      font-size: 14px;
+      color: var(--color-dark-grey);
+      line-height: 1.8;
+      white-space: pre-wrap;
+    }
+
+    .conversation-box {
+      background: var(--color-secondary);
+      border-radius: 8px;
+      padding: 28px 32px;
+      margin-bottom: 16px;
+    }
+    .conversation-box .section-label { color: var(--color-highlight); }
+    .conversation-box .section-content { color: white; white-space: pre-wrap; }
+
+    /* Q&A box */
+    .qa-box {
+      background: white;
+      border-radius: 8px;
+      padding: 24px 32px;
+      margin-bottom: 16px;
+      border: 1px solid var(--color-light-grey);
+    }
+    .qa-box .section-label { color: var(--color-dark-grey); }
+    .qa-input-row { display: flex; gap: 10px; margin-top: 14px; }
+    .qa-input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid var(--color-light-grey);
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: Georgia, serif;
+      resize: none;
+      height: 44px;
+      line-height: 1.4;
+    }
+    .qa-input:focus { outline: none; border-color: var(--color-primary); }
+    .qa-btn {
+      padding: 10px 20px;
+      background: var(--color-primary);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: Georgia, serif;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .qa-btn:hover { background: #1565b0; }
+    .qa-btn:disabled { background: var(--color-mid-grey); cursor: not-allowed; }
+    .qa-answer {
+      margin-top: 14px;
+      padding: 14px 16px;
+      background: var(--color-off-white);
+      border-radius: 4px;
+      font-size: 13px;
+      color: var(--color-dark-grey);
+      line-height: 1.7;
+      display: none;
+    }
+    .qa-disclaimer {
+      font-size: 11px;
+      color: var(--color-mid-grey);
+      margin-top: 8px;
+    }
+
+    .actions { display: flex; gap: 12px; margin-bottom: 24px; }
+    .action-btn {
+      padding: 8px 20px;
+      border: 1px solid var(--color-light-grey);
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: Georgia, serif;
+      cursor: pointer;
+      background: white;
+      color: var(--color-dark-grey);
+      text-decoration: none;
+    }
+    .action-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      padding: 16px 0;
+      border-top: 1px solid var(--color-light-grey);
+      font-size: 11px;
+      color: var(--color-mid-grey);
+      margin-top: 40px;
+    }
+    .footer-brand { font-weight: 600; color: var(--color-black); }
+
+    @media print {
+      .header, .actions, .action-bar, .qa-box { display: none; }
+      body { background: white; }
+      .main { padding: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <span class="brand">ICONIQ</span>
+    <a href="/" class="back-link">← Dashboard</a>
+  </div>
+  <span class="confidential">Private &amp; Strictly Confidential</span>
+</div>
+
+<div class="main">
+
+  <div class="actions">
+    <a href="/" class="action-btn">← All briefs</a>
+    <button class="action-btn" onclick="window.print()">Print / Save PDF</button>
+  </div>
+
+  <!-- Brief header -->
+  <div class="brief-header">
+    <div class="brief-meta">Strategic Brief · APAC Hunter · {{ brief.updated_at[:10] if brief.updated_at else '' }}</div>
+    <div class="brief-name">{{ brief.individual_name }}</div>
+    <div class="brief-company">{{ brief.company }}</div>
+    <div class="brief-trigger-row">
+      <span class="brief-trigger">{{ brief.last_trigger_type }}</span>
+      <span class="status-badge status-{{ brief.workflow_status|default('New') }}" id="status-badge">{{ brief.workflow_status|default('New') }}</span>
+      <select class="status-select" id="status-select" onchange="updateStatus(this)">
+        {% set statuses = ['New', 'Triage', 'Priority', 'Monitor', 'Handoff', 'Discarded'] %}
+        {% for s in statuses %}
+        <option value="{{ s }}" {% if (brief.workflow_status|default('New')) == s %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="score-strip">
+      <div class="score-box">
+        <span class="score-number urgency">{{ brief.urgency_score or '—' }}</span>
+        <div class="score-name">Urgency</div>
+      </div>
+      <div class="score-box">
+        <span class="score-number wealth">{{ brief.wealth_score or '—' }}</span>
+        <div class="score-name">Wealth Size</div>
+      </div>
+    </div>
+
+    <div class="confidence-row">
+      Signal confidence:
+      <span class="confidence-badge confidence-{{ brief.confidence or 'Medium' }}">{{ brief.confidence or 'Medium' }}</span>
+      &nbsp;Evidence quality:
+      <span class="confidence-badge confidence-{{ brief.confidence_level or 'Low' }}">{{ brief.confidence_level or 'Low' }}</span>
+    </div>
+  </div>
+
+  <!-- Action bar -->
+  <div class="action-bar">
+    <div class="action-bar-left">
+      <h3>Quantitative Analysis Available</h3>
+      <p>Run a deep analytical model for {{ brief.individual_name }} based on primary filing data</p>
+    </div>
+    <a href="/analysis/{{ brief.id }}" class="analysis-btn">
+      Run Analysis
+    </a>
+  </div>
+
+  <!-- Brief sections -->
+  <div class="brief-section">
+    <div class="section-label">Individual Profile</div>
+    <div class="section-content">{{ brief.individual_profile or 'No profile data available.' }}</div>
+  </div>
+
+  <div class="brief-section">
+    <div class="section-label">The Event — What Happened</div>
+    <div class="section-content">{{ brief.event_summary or 'No event summary available.' }}</div>
+  </div>
+
+  {% if brief.why_this_matters %}
+  <div class="brief-section" style="border-left: 3px solid var(--color-highlight); padding-left: 29px;">
+    <div class="section-label" style="color: var(--color-highlight);">Why This Matters</div>
+    <ul style="padding-left: 18px; margin: 0;">
+      {% for bullet in brief.why_this_matters %}
+      <li style="font-size: 14px; color: var(--color-dark-grey); line-height: 1.8; margin-bottom: 4px;">{{ bullet }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  <div class="brief-section">
+    <div class="section-label">Wealth &amp; Control Analysis</div>
+    <div class="section-content">{{ brief.wealth_control_analysis or 'No analysis available.' }}</div>
+  </div>
+
+  <div class="brief-section">
+    <div class="section-label">Relevant Network Signal</div>
+    <div class="section-content">{{ brief.network_signal or brief.access_pathways or 'No network signal identified.' }}</div>
+  </div>
+
+  <div class="brief-section">
+    <div class="section-label">Behavioural Signals</div>
+    <div class="section-content">{{ brief.behavioural_signals or 'No behavioural signals identified.' }}</div>
+  </div>
+
+  <div class="brief-section">
+    <div class="section-label">How ICONIQ Can Help</div>
+    <div class="section-content">{{ brief.iconiq_value_prop or 'No value proposition drafted.' }}</div>
+  </div>
+
+  <div class="conversation-box">
+    <div class="section-label">Suggested First Conversation</div>
+    <div class="section-content">{{ brief.suggested_conversation or 'No conversation framing available.' }}</div>
+  </div>
+
+  <!-- Q&A box -->
+  <div class="qa-box">
+    <div class="section-label">Ask a question about this brief</div>
+    <p style="font-size:12px;color:var(--color-mid-grey);margin-top:4px;">Answers are grounded in this brief and its underlying source context only.</p>
+    <div class="qa-input-row">
+      <textarea class="qa-input" id="qa-input" placeholder="e.g. How many shares were sold? What triggered this alert? What is the most relevant angle?" rows="1"></textarea>
+      <button class="qa-btn" id="qa-btn" onclick="askQuestion()">Ask</button>
+    </div>
+    <div class="qa-answer" id="qa-answer"></div>
+    <div class="qa-disclaimer">Questions and answers are not logged or stored.</div>
+  </div>
+
+  <div class="footer">
+    <span class="footer-brand">ICONIQ</span>
+    <span>Private &amp; Strictly Confidential</span>
+    <span>APAC Hunter v3.1</span>
+  </div>
+
+</div>
+
+<script>
+const BRIEF_ID = "{{ brief.id }}";
+
+function updateStatus(select) {
+  const status = select.value;
+  fetch('/brief/' + BRIEF_ID + '/status', {
+    method: 'PATCH',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({status: status})
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      const badge = document.getElementById('status-badge');
+      badge.className = 'status-badge status-' + status;
+      badge.textContent = status;
+    } else {
+      alert('Failed to update status: ' + (data.error || 'Unknown error'));
+    }
+  })
+  .catch(() => alert('Network error updating status'));
+}
+
+function askQuestion() {
+  const input = document.getElementById('qa-input');
+  const btn = document.getElementById('qa-btn');
+  const answerBox = document.getElementById('qa-answer');
+  const question = input.value.trim();
+
+  if (!question) return;
+  if (question.length > 500) {
+    alert('Question too long (max 500 characters)');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Thinking...';
+  answerBox.style.display = 'none';
+  answerBox.textContent = '';
+
+  fetch('/brief/' + BRIEF_ID + '/ask', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({question: question})
+  })
+  .then(r => r.json())
+  .then(data => {
+    answerBox.textContent = data.answer || data.error || 'No answer returned.';
+    answerBox.style.display = 'block';
+  })
+  .catch(() => {
+    answerBox.textContent = 'Network error — could not reach server.';
+    answerBox.style.display = 'block';
+  })
+  .finally(() => {
+    btn.disabled = false;
+    btn.textContent = 'Ask';
+  });
+}
+
+// Allow Enter to submit (Shift+Enter for newline)
+document.getElementById('qa-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    askQuestion();
+  }
+});
+</script>
+</body>
+</html>

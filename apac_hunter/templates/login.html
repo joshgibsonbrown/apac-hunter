@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>APAC Hunter — Login</title>
+  <style>
+    :root {
+      --color-black: #151515;
+      --color-dark-grey: #696969;
+      --color-light-grey: #DDDDDD;
+      --color-off-white: #F2F2F2;
+      --color-primary: #1A7CD7;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Georgia, serif;
+      background: var(--color-off-white);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .login-card {
+      background: white;
+      padding: 48px;
+      border-radius: 8px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+    }
+    .brand {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      color: var(--color-black);
+      margin-bottom: 8px;
+    }
+    h1 {
+      font-size: 24px;
+      font-weight: 400;
+      color: var(--color-black);
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      font-size: 13px;
+      color: var(--color-dark-grey);
+      margin-bottom: 32px;
+    }
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--color-dark-grey);
+      margin-bottom: 6px;
+    }
+    input[type="password"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--color-light-grey);
+      border-radius: 4px;
+      font-size: 14px;
+      font-family: Georgia, serif;
+      margin-bottom: 20px;
+      outline: none;
+    }
+    input[type="password"]:focus {
+      border-color: var(--color-primary);
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: var(--color-primary);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      font-family: Georgia, serif;
+      cursor: pointer;
+    }
+    button:hover { background: #1565b0; }
+    .error {
+      background: #fde8e8;
+      color: #c0392b;
+      padding: 10px 14px;
+      border-radius: 4px;
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+    .footer {
+      margin-top: 32px;
+      font-size: 11px;
+      color: var(--color-light-grey);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <div class="brand">ICONIQ</div>
+    <h1>APAC Hunter</h1>
+    <div class="subtitle">Trigger + Access Engine · Private &amp; Strictly Confidential</div>
+    {% if error %}
+    <div class="error">{{ error }}</div>
+    {% endif %}
+    <form method="POST">
+      <label>Password</label>
+      <input type="password" name="password" autofocus placeholder="Enter access password">
+      <button type="submit">Access Dashboard</button>
+    </form>
+    <div class="footer">ICONIQ Capital · Private &amp; Strictly Confidential</div>
+  </div>
+</body>
+</html>
