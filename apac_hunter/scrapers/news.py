@@ -134,6 +134,12 @@ def parse_news_date(date_str):
             elif "week" in date_str.lower():
                 weeks = int("".join(filter(str.isdigit, date_str)) or 1)
                 return datetime.now() - timedelta(weeks=weeks)
+            elif "month" in date_str.lower():
+                months = int("".join(filter(str.isdigit, date_str)) or 1)
+                return datetime.now() - timedelta(days=months * 30)
+            elif "year" in date_str.lower():
+                years = int("".join(filter(str.isdigit, date_str)) or 1)
+                return datetime.now() - timedelta(days=years * 365)
         for fmt in ["%Y-%m-%d", "%b %d, %Y", "%d %b %Y", "%m/%d/%Y"]:
             try:
                 return datetime.strptime(date_str[: len(fmt) + 2].strip(), fmt)

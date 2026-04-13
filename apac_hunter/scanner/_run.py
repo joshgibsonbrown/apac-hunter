@@ -121,8 +121,10 @@ def run_scan(
     deduped: list = []
     for f in all_filings:
         title = f.get("title", "").strip().lower()[:80]
-        if title and title not in seen_titles:
-            seen_titles.add(title)
+        company = f.get("company", "").strip().lower()[:40]
+        key = f"{title}|{company}"
+        if title and key not in seen_titles:
+            seen_titles.add(key)
             deduped.append(f)
     all_filings = deduped
     total_fetched = len(all_filings)
@@ -176,6 +178,8 @@ def run_scan(
 
         results = classify_batch(batch_filings, region_config=region_cfg)
 
+        region_countries_lower = [c.lower() for c in (region_cfg or {}).get("countries", [])]
+
         for result in results:
             if not result:
                 continue
@@ -184,6 +188,20 @@ def run_scan(
             if not clean_name:
                 print(f"    — Skipping: name unclear ('{raw_name}')")
                 continue
+
+            # Geography validation — reject if classifier placed the individual
+            # in a country that doesn't belong to the active region
+            result_country = (result.get("country") or "").lower().strip()
+            if result_country and region_countries_lower:
+                in_region = any(
+                    result_country in c or c in result_country
+                    for c in region_countries_lower
+                )
+                if not in_region:
+                    print(f"    — Skipping geography mismatch: {clean_name} "
+                          f"({result.get('country')}) not in {region_id.upper()} region")
+                    continue
+
             result["individual_name"] = clean_name
             result["region"] = region_id
             print(f"    ✓ TRIGGER: {result.get('trigger_type')} — {clean_name} [{region_id.upper()}]")

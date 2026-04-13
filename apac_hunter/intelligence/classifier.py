@@ -60,11 +60,19 @@ MANDATE:
 
 GEOGRAPHY — relevant countries: {country_list}
 
-IMPORTANT: Be very conservative. Only return relevant=true if:
-- A specific named individual founder/owner/family is identifiable
-- Their personal wealth event is $30M+ in value OR their net worth is $50M+
-- It is a genuine trigger archetype, not general business news
-- For PE deals and funding rounds: only flag if a named founder or family is receiving personal liquidity, not just the company raising money
+HARD REJECTIONS — return {{"relevant": false}} immediately if ANY of these apply:
+- The named individual is clearly based outside the target geography (e.g. an American executive when scanning APAC)
+- The entity is an institutional investor: sovereign wealth fund (GIC, Temasek, ADIA, CIC, Mubadala, CPP, GIC rebalancing), pension fund, PE firm acting as buyer/acquirer, large bank treasury operation
+- It is a company fundraising round (Series A/B/C/D/E) where NO named founder is confirmed to receive personal liquidity proceeds
+- The event clearly occurred more than 6 months ago (historical article, not a current event)
+- The "individual" is a corporation, fund, or government entity — not a human being
+- It is routine executive compensation: standard RSU vesting, option grants, salary disclosure under $10M total
+
+Only return relevant=true if ALL of these are true:
+- A specific named human individual (founder/owner/family member) is clearly identifiable
+- Their personal wealth event is $30M+ in value OR their personal net worth is $50M+
+- The individual's primary base or nationality matches the target geography
+- It is a genuine current trigger archetype, not general business news
 
 Respond with JSON only. If NOT relevant: {{"relevant": false}}
 If relevant: {{"relevant": true, "individual_name": "...", "company": "...", "country": "...", "trigger_type": "...", "tier": 1-3, "headline": "...", "significance": "...", "urgency_score": 1-10, "wealth_score": 1-10, "confidence": "High/Medium/Low", "estimated_net_worth_notes": "..."}}"""
@@ -122,11 +130,19 @@ TRIGGER ARCHETYPES:
 MANDATE: {mandate_text}
 GEOGRAPHY: {country_list}
 
-IMPORTANT: Be very conservative. Only flag as relevant if:
-- A specific named individual founder/owner/family is identifiable
-- Their personal wealth event is $30M+ OR net worth is $50M+
-- It is a genuine trigger archetype, not general business news
-- For PE deals/funding rounds: only flag if a named founder receives personal liquidity
+HARD REJECTIONS — mark {{"relevant": false}} immediately if ANY apply:
+- Individual is clearly based outside target geography (e.g. American for APAC scan)
+- Entity is institutional: sovereign wealth fund (GIC, Temasek, ADIA, CIC, Mubadala, CPP), pension fund, PE firm as buyer, bank treasury
+- Company fundraising round with no named founder confirmed receiving personal proceeds
+- Event clearly occurred more than 6 months ago
+- "Individual" is a corporation, fund, or government entity — not a human being
+- Routine executive compensation under $10M (RSU vesting, option grants, salary)
+
+Only flag relevant=true if ALL true:
+- Specific named human individual (founder/owner/family member) is identifiable
+- Personal wealth event $30M+ OR personal net worth $50M+
+- Individual's primary base or nationality matches target geography
+- Genuine current trigger event, not historical or general business news
 
 Respond with a JSON array of exactly {len(filings)} objects, one per item in order.
 For items NOT relevant: {{"relevant": false}}
